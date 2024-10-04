@@ -26,7 +26,12 @@ If not, make sure the venv is the selected interpreter, and that you restarted V
 ### Downloading dependencies to the venv
 In your VSCode terminal, run the following command (replace ```pip``` with ```pip3``` if it doesn't work):
 ```
-pip install fastapi "uvicorn[standard]" 
+pip install fastapi "uvicorn[standard]" sqlalchemy sqlalchemy-utils
+
+```
+Run this too, uvicorn doesn't work unless I install this for whatever reason
+```
+pip install -U email-validator
 ```
 
 ### Running App
@@ -35,6 +40,8 @@ Just run
 uvicorn main:app --reload
 ```
 in your terminal (or actually you could run the file normally, I made it work)
+
+You will see that an SQLite database is automatically created if it doesn't already exist
 
 To stop the app, just press Ctrl + C while terminal is selected
 
