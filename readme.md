@@ -47,8 +47,6 @@ uvicorn main:app --reload
 ```
 in your terminal (or actually you could run the file normally, I made it work)
 
-You will see that an SQLite database is automatically created if it doesn't already exist
-
 To stop the app, just press Ctrl + C while terminal is selected
 
 
