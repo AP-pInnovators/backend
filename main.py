@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 from pydantic import BaseModel #handles how incoming json should be formatted and recieved/passed into endpoints
-from databases.UserDB import UserDB
+from databases.UserDB import UserDB #class made to handle all database interaction (2 methods, add_user and find_suser)
 
 app = FastAPI()
 userdb = UserDB()

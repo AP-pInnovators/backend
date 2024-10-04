@@ -18,7 +18,7 @@ class UserDB:
         password = Column(String)
 
     
-    def add_user(self, username: str, email: str, password: str):
+    def add_user(self, username: str, email: str, password: str): #adds a user
         if username and password:
             new_user = self.User(username=username, email=email, password=password)
             self.session.add(new_user) #adds user object
@@ -26,7 +26,7 @@ class UserDB:
         else:
             print("add_user: Missing username or password, no user added")
 
-    def find_users(self, username: str):
+    def find_users(self, username: str): #returns a list of dictionaries, one for each user
         #structure = session.query(table object).filter(operation on column object inside table object).all()/.first()
 
         if username:
@@ -40,4 +40,4 @@ class UserDB:
         for user_dict in user_list: #remove useless SQLAlchemy metadata from dictionaries
             user_dict.pop('_sa_instance_state',None)
 
-        return user_list
+        return user_list #returns all users matching the specified query (ideally 0 or 1, can be more but shouldnt)
