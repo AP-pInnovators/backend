@@ -34,6 +34,13 @@ Run this too, uvicorn doesn't work unless I install this for whatever reason
 pip install -U email-validator
 ```
 
+### Database Setup
+1. When you have the project open in VSCode, make sure you have all the dependencies installed from above
+2. Check your terminal to make sure you are CD'd into the projects root directory (make sure you are not in any folder such as testing, docs, databases, etc)
+3. Once you have verified everything above, use the explorer to databases > database_setup > UserDB_setup.py and open the file
+4. Run it and the database should be set up correctly (if it doesn't work make sure you are running the file in the root project directory, hence step 2)
+
+
 ### Running App
 Just run
 ```
