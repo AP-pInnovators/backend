@@ -15,7 +15,7 @@ The assumption here is that you're using VSCode and have Python installed proper
 9. Select the option that says "Recommended" on the right (should be the path with "venv" in it)
 10. Open the terminal and start a Python shell by typing ```python``` (if that doesn't work, try ```python3``` or ```py```)
 11. Enter ```import sys```
-12. Enter ```sys.prefix```
+12. Enter ```sys.prefix``` (after looking below exit with ```exit()```)
 
 If the very end of the printed path says ".venv", then it worked
 
@@ -27,7 +27,6 @@ If not, make sure the venv is the selected interpreter, and that you restarted V
 In your VSCode terminal, run the following command (replace ```pip``` with ```pip3``` if it doesn't work):
 ```
 pip install fastapi "uvicorn[standard]" sqlalchemy sqlalchemy-utils
-
 ```
 Run this too, uvicorn doesn't work unless I install this for whatever reason
 ```
