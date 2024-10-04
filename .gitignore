@@ -1,4 +1,4 @@
 .venv/
 __pycache__/
 databases/instance/
-!databases/.gitkeep
+!databases/instance/.gitkeep
