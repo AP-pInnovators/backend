@@ -36,7 +36,7 @@ async def login(user: UserLoginJSON):
     else:
         return {"success":"false",
                 "error_code":"placeholder",
-                "error_message":"Incorrect password"} #should 
+                "error_message":"Incorrect password"} #refer to todo (make sure messages are different due to cybersecurity reasons)
 
 
 class UserSignUpJSON(BaseModel): #creates a pydantic class that models the expected incoming json for logging in/signing up
