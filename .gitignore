@@ -2,3 +2,4 @@
 __pycache__/
 databases/instance/*
 !databases/instance/.gitkeep
+logFile.txt
