@@ -7,32 +7,24 @@ from typing import List #works with above
 
 from databases.DB import DB #class made to handle all database interaction (2 methods, add_user and find_user)
 
+import logging
+
 import time
 
 app = FastAPI()
 db = DB()
+# logger = logging.getLogger(__name__) #still working on getting it to log to a file
 
-
-
-#below is the file writing/logging function (just for abstraction)
-def log(endpoint, ip, message):
-    with open("logFile.txt", "at") as logFile: #'at' stands for "append text file"
-        logFile.write(str(endpoint) + " (" + str(ip) +") - " + time.strftime("%m/%d/%Y") + "@" + time.strftime("%H:%M:%S", time.localtime()) + " | " + str(message) + "\n")
-
-#log server startup
-log("api/", "server", "Server Started")
 
 '''
 https://gist.github.com/liviaerxin/d320e33cbcddcc5df76dd92948e5be3b
-use this for logging, not the function above
-also refer below if needed to get ip/port from request
-
+use this for logging in the
+also refer to test endpoint if needed to get ip/port from request
 '''
 
 
 @app.get("/api/test")
 async def test(request: Request):
-    log("api/test", str(request.client), "Success")
     print(request.client)
     return {"greeting":"Hello world"}
 
@@ -136,3 +128,4 @@ async def question(question_id: int):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    # uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True, log_config="log_conf.yaml") #working on it

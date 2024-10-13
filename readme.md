@@ -26,7 +26,7 @@ If not, make sure the venv is the selected interpreter, and that you restarted V
 ### Downloading dependencies to the venv
 In your VSCode terminal, run the following command (replace ```pip``` with ```pip3``` if it doesn't work):
 ```
-pip install fastapi "uvicorn[standard]" sqlalchemy sqlalchemy-utils
+pip install -r requirements.txt
 ```
 Run this too, uvicorn doesn't work unless I install this for whatever reason
 ```
