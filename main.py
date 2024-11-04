@@ -27,8 +27,7 @@ also refer to test endpoint if needed to get ip/port from request
 
 
 @app.get("/api/test")
-async def test(request: Request):
-    print(request.client)
+async def test():
     return {"greeting":"Hello world"}
 
 
@@ -50,7 +49,7 @@ async def login(user: UserLoginJSON):
                 "error_code":"placeholder",
                 "error_message":"No user exists"}
     login_user = login_user[0]
-    if login_user["password"] ==  bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt()):
+    if bcrypt.checkpw(user.password.encode('utf-8'), login_user["password"]):
         return {"success":True,
                 "session_token":"placeholder"}
     else:
