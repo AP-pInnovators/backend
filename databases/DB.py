@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine, Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker, declarative_base
+from databases.instance.DB_setup import *
 
 
 
@@ -10,46 +11,12 @@ class DB:
     Session = sessionmaker(bind=engine) #binds session to engine
     session = Session() #creates session object
 
-    class User(Base): #inherits from declarative_base object to define how a table is structured
-        __tablename__ = 'Users'
-        id = Column(Integer, primary_key=True)
-        username = Column(String)
-        email = Column(String)
-        password = Column(String)
-
-    class Question(Base): #inherits from declarative_base object to define how a table is structured
-        __tablename__ = 'Questions'
-        id = Column(Integer, primary_key=True)
-        content = Column(String)
-
-    class Answer(Base): #inherits from declarative_base object to define how a table is structured
-        __tablename__ = 'Answers'
-        id = Column(Integer, primary_key=True)
-        content = Column(String)
-        correct = Column(Boolean)
-        question_id = Column(Integer)
-
-    class Solution(Base): #inherits from declarative_base object to define how a table is structured
-        __tablename__ = 'Solutions'
-        id = Column(Integer, primary_key=True)
-        content = Column(String)
-        question_id = Column(Integer)
-    
-    class UserResponses(Base): #inherits from declarative_base object to define how a table is structured
-        __tablename__ = 'UserResponses'
-        id = Column(Integer, primary_key=True)
-        user_id = Column(String)
-        question_id = Column(Integer)
-        answer_id = Column(Integer)
-        submission_time = Column(Integer) #in seconds or milliseconds ideally
-        answer_time = Column(Integer) #same as above, this should be how long it took them
-
 
 
     # user functions below
     def add_user(self, username: str, email: str, password: str): #adds a user
         if username and password:
-            new_user = self.User(username=username, email=email, password=password)
+            new_user = User(username=username, email=email, password=password)
             self.session.add(new_user) #adds user object
             self.session.commit() #commits changes to file
         else:
@@ -59,7 +26,7 @@ class DB:
         #structure = session.query(table object).filter(operation on column object inside table object).all()/.first()
 
         if username:
-            result = self.session.query(self.User).filter(self.User.username == username).all()
+            result = self.session.query(User).filter(User.username == username).all()
         else:
             print("find_user: No username passed in")
             return []
@@ -78,7 +45,7 @@ class DB:
     # question functions below
     def get_questions(self, id: int): #returns a list of dictionaries, one for each question (should only be 1 or 0)
         if id:
-            result = self.session.query(self.Question).filter(self.Question.id == id).all()
+            result = self.session.query(Question).filter(Question.id == id).all()
         else:
             print("get_question: No id passed in")
             return []
@@ -90,20 +57,34 @@ class DB:
 
         return question_list #should only return 1 or 0 elements
 
-    
-    def add_question_answers_solutions(self, question: str, answers: list, solutions: list):
-        if question and answers:
-            new_question = self.Question(content=question)
+    def add_question(self, content: str, difficulty: int):
+        if content and difficulty != None:
+            new_question = Question(content=content, difficulty=difficulty)
             self.session.add(new_question) #adds user object
             self.session.commit()
-            question_id = new_question.id
-            for answer in answers: #adds all answers referencing the question id
-                new_answer = self.Answer(content=answer["content"], correct=answer["correct"], question_id=question_id)
-                self.session.add(new_answer)
-            for solution in solutions: #adds all solutions referencing the question id
-                new_solution = self.Solution(content=solution["content"], question_id=question_id)
-                self.session.add(new_solution)
-            self.session.commit()
+            return new_question.id
         else:
-            print("add_question_answers_solutions: Missing question content or answers, no question added")
+            print("add_question: Missing question content or difficulty (should be 0 for undefined), no question added")
+
+    #add update_question and really every other table's update function
+
+    def add_answer(self, content: str, correct: bool, question_id: int):
+        if content and correct != None and question_id: # correct != None because False is falsey value and false triggers null prevention lol
+            new_answer = Answer(content=content, correct=correct, question_id=question_id)
+            self.session.add(new_answer)
+            self.session.commit()
+            return new_answer.id
+        else:
+            print("add_answer: Missing answer content, correct boolean, or question id, no answer added")
+
+    def add_solution(self, content: str, question_id: int):
+        if content and question_id:
+            new_solution = Solution(content=content, question_id=question_id)
+            self.session.add(new_solution)
+            self.session.commit()
+            return new_solution.id
+        else:
+            print("add_solution: Missing solution content or question id, no solution added")
+
+
         

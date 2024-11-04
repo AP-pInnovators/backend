@@ -9,3 +9,6 @@ Make it so username has character limit, doesn't allow certain characters, basic
 Make it so email has to be a valid email (and add email verification later... much later lol)
 
 Make it so password has to be certain length
+
+
+Add an update function for every table (primarily users and questions first)

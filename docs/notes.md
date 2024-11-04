@@ -14,12 +14,13 @@ This is what the JSON sent to the adding questions endpoint should look like
 
 ```
 {
-    "question" : "question, answer 4 is correct",
+    "content" : "question, answer 4 is correct",
+    "difficulty" : integer from 1-10, might change later, 0 for undefined difficulty,
     "answers" : [
-                {"content" : "answer 1", "correct" : "false"},
-                {"content" : "answer 2", "correct" : "false"},
-                {"content" : "answer 3", "correct" : "false"},
-                {"content" : "answer 4", "correct" : "true"}
+                {"content" : "answer 1", "correct" : false},
+                {"content" : "answer 2", "correct" : false},
+                {"content" : "answer 3", "correct" : false},
+                {"content" : "answer 4", "correct" : true}
                 ],
     "solutions" : [
                 {"content" : "solution 1"},
@@ -34,12 +35,13 @@ This is what the JSON sent to the adding questions endpoint should look like
 
 ```
 {
-    "question" : "What is 1+3",
+    "content" : "What is 1+3",
+    "difficulty" : 1,
     "answers" : [
-                {"content" : "1", "correct" : "false"},
-                {"content" : "2", "correct" : "false"},
-                {"content" : "3", "correct" : "false"},
-                {"content" : "4", "correct" : "true"}
+                {"content" : "1", "correct" : false},
+                {"content" : "2", "correct" : false},
+                {"content" : "3", "correct" : false},
+                {"content" : "4", "correct" : true}
                 ],
     "solutions" : [
                 {"content" : "Add 1 to 3"},

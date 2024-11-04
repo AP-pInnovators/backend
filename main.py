@@ -1,11 +1,14 @@
-# run file: uvicorn main:app --reload
+    # run file: uvicorn main:app --reload
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from pydantic import BaseModel #handles how incoming json should be formatted and recieved/passed into endpoints
 from typing import List #works with above
 
 from databases.DB import DB #class made to handle all database interaction (2 methods, add_user and find_user)
+
+import bcrypt
 
 import logging
 
@@ -47,7 +50,7 @@ async def login(user: UserLoginJSON):
                 "error_code":"placeholder",
                 "error_message":"No user exists"}
     login_user = login_user[0]
-    if login_user["password"] == user.password:
+    if login_user["password"] ==  bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt()):
         return {"success":True,
                 "session_token":"placeholder"}
     else:
@@ -68,7 +71,7 @@ async def signup(user: UserSignUpJSON):
                 "error_code":"placeholder",
                 "error_message":"Username already exists"}
     else:
-        db.add_user(user.username, user.email, user.password)
+        db.add_user(user.username, user.email, bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt()))
         return {"success":True,
                 "session_token":"placeholder"}
 
@@ -82,10 +85,10 @@ class SolutionAddJSON(BaseModel):
     content: str
 
 class QuestionAddJSON(BaseModel):
-    question: str
+    content: str
+    difficulty: int
     answers: List[AnswerAddJSON]
     solutions: List[SolutionAddJSON]
-
 
 
 @app.post("/api/add_question/")
@@ -97,7 +100,15 @@ async def add_question(question: QuestionAddJSON):
     for solution in question.solutions: #turns all solution json into dict
         solutions.append(solution.__dict__)
     try:
-        db.add_question_answers_solutions(question.question, answers, solutions)
+        question_id = db.add_question(question.content)
+        print(question_id)
+
+        for answer in question.answers:
+            db.add_answer(answer.content, answer.correct, question_id)
+
+        for solution in question.solutions:
+            db.add_answer(solution.content, question_id)
+
         return {"success":True,
                 "message":"placeholder"}
     except:
