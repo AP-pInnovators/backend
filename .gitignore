@@ -1,6 +1,6 @@
 .venv/
 __pycache__/
 databases/instance/*
-!databases/instance/.gitkeep
+!databases/instance/DB_setup.py
 logging/*
 !logging/.gitkeep
