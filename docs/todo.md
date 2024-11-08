@@ -13,4 +13,4 @@ Make it so password has to be certain length
 
 Make error codes json file with corresponding messages, so that frontend can have it and import it so both backend and frontend can store error messages
 
-Make JWT tokens last forever, and also once I add back timed JWT tokens make an endpoint to refresh your session
+Make JWT tokens last forever, and also once I add back timed JWT tokens make an endpoint to refresh your session (lowkey could just go straight to the second part it wouldn't be difficult)
