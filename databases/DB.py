@@ -96,7 +96,7 @@ class DB:
             new_user_stats = UserStatistics(user_id=user_id, total_score=0, solved_problems_count=0)
             self.session.add(new_user_stats)
             self.session.commit()
-            return new_user_stats.id
+            return new_user_stats.user_id
         else:
             print("add_user_stats: Missing user id, no user stats added")
             return None
@@ -130,7 +130,7 @@ class DB:
             if added_problem_count:
                 result.solved_problems_count += added_problem_count
             self.session.commit() #commits changes to file
-            return result.id
+            return result.user_id
         else:
             print("update_user_stats: No user id passed in")
             return None
