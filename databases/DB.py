@@ -14,15 +14,18 @@ class DB:
 
 
     def dictify(self, result):
-        dict = [row.__dict__ for row in result]
+        dict = [row.__dict__ for row in result] #can handle multiple results, returns a list of dictionaries (each one is a result)
 
         for row_dict in dict: #remove useless SQLAlchemy metadata from dictionaries
             row_dict.pop('_sa_instance_state',None)
 
         return dict #should only return 1 or 0 elements
 
-    #add update_question and really every other table's update function
 
+
+    #add functions
+    #get functions
+    #update functions
 
 
     def add_user(self, username: str, email: str, password: str): #adds a user
@@ -35,155 +38,235 @@ class DB:
             print("add_user: Missing username, email, or password, no user added")
             return None
 
-    def get_users(self, username: str): #returns a list of dictionaries, one for each user
+    def get_user_by_username(self, username: str): #returns a list of dictionaries, one for each user
         #structure = session.query(table object).filter(operation on column object inside table object).all()/.first()
         if username:
             result = self.session.query(User).filter(User.username == username).all()
             if len(result) > 1:
-                print("get_users: More than one user with username " + username + " exists, this shouldn't happen")
+                print("get_user_by_username: Duplicate user id")
                 return None
             if len(result) < 1:
-                print("get_users: No users exist with user id")
+                print("get_user_by_username: No users found")
                 return None
-            return self.dictify(result) #returns all users matching the specified query (ideally 0 or 1, can be more but shouldnt)
+            return self.dictify(result)[0] #returns all users matching the specified query (ideally 0 or 1, can be more but shouldnt)
         else:
-            print("get_users: No username passed in")
+            print("get_user_by_username: No username passed in")
+            return None
+    
+    def get_user_by_id(self, user_id: int):
+        if user_id:
+            result = self.session.query(User).filter(User.id == user_id).all()
+            if len(result) > 1:
+                print("get_user_by_id: Duplicate user id")
+                return None
+            if len(result) < 1:
+                print("get_user_by_id: No users found")
+                return None
+            return self.dictify(result)[0]
+        else:
+            print("get_user_by_id: No user_id passed in")
+            return None
+        
+    def update_user(self, user_id: int, username: str, email: str, password: str):
+        if user_id:
+            result = self.session.query(User).filter(User.id == user_id).all()
+            if len(result) > 1:
+                print("update_user: Duplicate user id")
+                return None
+            if len(result) < 1:
+                print("update_user: No users found")
+                return None
+            result = result[0]
+            if username:
+                result.username = username
+            if email:
+                result.email = email
+            if password:
+                result.password = password
+            self.session.commit() #commits changes to file
+            return result.id
+        else:
+            print("update_user: No user id passed in")
             return None
     
 
 
-    def add_user_stats(self, user_id: str):
+    def add_user_statistics(self, user_id: int):
         if user_id:
             new_user_stats = UserStatistics(user_id=user_id, total_score=0, solved_problems_count=0)
-            self.session.add(new_user_stats) #adds user object
-            self.session.commit() #commits changes to file
+            self.session.add(new_user_stats)
+            self.session.commit()
             return new_user_stats.id
         else:
             print("add_user_stats: Missing user id, no user stats added")
             return None
         
-    def get_user_stats(self, user_id: str): #returns a list of dictionaries, one for each user
+    def get_user_statistics(self, user_id: int):
         if user_id:
             result = self.session.query(UserStatistics).filter(UserStatistics.user_id == user_id).all()
-            return self.dictify(result) #returns all user statistics matching the specified query (ideally 0 or 1, can be more but shouldnt)
+            if len(result) > 1:
+                print("get_user_stats: Duplicate user id")
+                return None
+            if len(result) < 1:
+                print("get_user_stats: No users found")
+                return None
+            return self.dictify(result)[0]
         else:
-            print("get_user_stats: No user id passed in")
+            print("get_user_stats: No user_id passed in")
             return None
 
-    def update_user_stats(self, user_id, added_score, added_problem_count):
-        if user_id and added_score != None and added_problem_count != None:
-            user_stats = self.session.query(UserStatistics).filter(UserStatistics.user_id == user_id).all()
-            if len(user_stats) > 1:
-                print("update_user_stats: More than one user stats exist, this shouldn't happen; nothing updated")
+    def update_user_statistics(self, user_id: int, added_score: int, added_problem_count: int):
+        if user_id:
+            result = self.session.query(UserStatistics).filter(UserStatistics.user_id == user_id).all()
+            if len(result) > 1:
+                print("update_user_stats: Duplicate user id")
                 return None
-            if len(user_stats) < 1:
-                print("update_user_stats: No user stats exist for that user id; nothing updated")
+            if len(result) < 1:
+                print("update_user_stats: No users found")
                 return None
-            user_stats = user_stats[0]
-            user_stats.total_score += added_score
-            user_stats.solved_problems_count += added_problem_count
+            result = result[0]
+            if added_score:
+                result.total_score += added_score
+            if added_problem_count:
+                result.solved_problems_count += added_problem_count
             self.session.commit() #commits changes to file
-            return user_stats.id
+            return result.id
         else:
-            print("update_user_stats: User id, added score, or added_problem_count not passed in; nothing updated")
+            print("update_user_stats: No user id passed in")
             return None
 
-    
 
-    def get_questions(self, id: int): #returns a list of dictionaries, one for each question (should only be 1 or 0)
-        if id:
-            result = self.session.query(Question).filter(Question.id == id).all()
-        else:
-            print("get_question: No id passed in")
-            return []
-        
-        return self.dictify(result) #should only return 1 or 0 elements
 
     def add_question(self, content: str, difficulty: int):
         if content and difficulty != None:
             new_question = Question(content=content, difficulty=difficulty)
-            self.session.add(new_question) #adds user object
+            self.session.add(new_question)
             self.session.commit()
             return new_question.id #necessary to link answers and solutions
         else:
-            print("add_question: Missing question content or difficulty (should be 0 for undefined), no question added")
+            print("add_question: Missing content or difficulty (should be 0 for undefined), no question added")
+            return None
+        
+    def get_question(self, question_id: int):
+        if question_id:
+            result = self.session.query(Question).filter(Question.id == question_id).all()
+            if len(result) > 1:
+                print("get_question: Duplicate question id")
+                return None
+            if len(result) < 1:
+                print("get_question: No question found")
+                return None
+            return self.dictify(result)[0]
+        else:
+            print("get_question: No question_id passed in")
+            return None
 
 
 
-    def add_answer(self, content: str, correct: bool, question_id: int):
+    def add_answer(self, question_id: int, content: str, correct: bool):
         if content and correct != None and question_id: # correct != None because False is falsey value and false triggers null prevention lol
-            new_answer = Answer(content=content, correct=correct, question_id=question_id)
+            new_answer = Answer(question_id=question_id, content=content, correct=correct)
             self.session.add(new_answer)
             self.session.commit()
             return new_answer.id
         else:
-            print("add_answer: Missing answer content, correct boolean, or question id, no answer added")
+            print("add_answer: Missing question id, answer content, or correct boolean, no answer added")
+            return None
 
     def get_answers(self, question_id: int):
         if question_id:
             result = self.session.query(Answer).filter(Answer.question_id == question_id).all()
+            return self.dictify(result) #dont need to handle multiple results because multiple results are expected
         else:
-            print("get_answer: No question_id passed in")
-            return []
-        
-        return self.dictify(result)
+            print("get_answers: No question_id passed in")
+            return None
 
 
 
-    def add_solution(self, content: str, question_id: int):
+    def add_solution(self, question_id: int, content: str):
         if content and question_id:
-            new_solution = Solution(content=content, question_id=question_id)
+            new_solution = Solution(question_id=question_id, content=content)
             self.session.add(new_solution)
             self.session.commit()
             return new_solution.id
         else:
-            print("add_solution: Missing solution content or question id, no solution added")
+            print("add_solution: Missing question id or solution content, no solution added")
+            return None
 
     def get_solutions(self, question_id: int):
         if question_id:
             result = self.session.query(Solution).filter(Solution.question_id == question_id).all()
+            return self.dictify(result)
         else:
-            print("get_solution: No question_id passed in")
-            return []
+            print("get_solutions: No question_id passed in")
+            return None
         
-        return self.dictify(result)
 
 
-
-    def add_user_response(self, user_id: str, question_id: int, answer_id: int, submission_time: int):
+    def add_user_response(self, user_id: int, question_id: int, answer_id: int, submission_time: int):
         if user_id and question_id and answer_id and submission_time:
-            new_answer = UserResponse(user_id=user_id, question_id=question_id, answer_id=answer_id, submission_time=submission_time)
-            self.session.add(new_answer)
+            new_response = UserResponse(user_id=user_id, question_id=question_id, answer_id=answer_id, submission_time=submission_time)
+            self.session.add(new_response)
             self.session.commit()
-            return new_answer.id
+            return new_response.id
         else:
             print("add_user_response: Missing user id, question id, answer id, or submission time, no answer added")
+            return None
 
     def get_user_responses(self, user_id: int, question_id: int):
         if user_id and question_id:
             result = self.session.query(UserResponse).filter(UserResponse.user_id == user_id and UserResponse.question_id == question_id).all()
+            return self.dictify(result)
         else:
             print("get_user_responses: No user id or question id passed in")
-            return []
-        
-        return self.dictify(result)
-    
+            return None
 
 
-    def add_user_response(self, user_id: str, question_id: int, answer_id: int, submission_time: int):
-        if user_id and question_id and answer_id and submission_time:
-            new_answer = UserResponse(user_id=user_id, question_id=question_id, answer_id=answer_id, submission_time=submission_time)
-            self.session.add(new_answer)
+
+    def add_user_problem_status(self, user_id: int, question_id: int, viewing_status: bool, correct_status: bool, attempt_count: int, creation_date: int):
+        if user_id and question_id and viewing_status != None and correct_status != None and attempt_count != None and creation_date:
+            new_user_problem_status = UserProblemStatus(user_id=user_id, question_id=question_id, viewing_status=viewing_status, correct_status=correct_status, attempt_count=attempt_count, creation_date=creation_date)
+            self.session.add(new_user_problem_status)
             self.session.commit()
-            return new_answer.id
+            return new_user_problem_status.id
         else:
-            print("add_user_response: Missing user id, question id, answer id, or submission time, no answer added")
-
-    def get_user_responses(self, user_id: int, question_id: int):
-        if user_id and question_id:
-            result = self.session.query(UserResponse).filter(UserResponse.user_id == user_id and UserResponse.question_id == question_id).all()
-        else:
-            print("get_user_responses: No user id or question id passed in")
-            return []
+            print("add_user_problem_status: Missing user id, question id, viewing_status, correct_status, attempt_count, or creation_date, no user status added")
+            return None
         
-        return self.dictify(result) #should only return 1 or 0 elements
+    def get_user_problem_status(self, user_id: int, question_id: int):
+        if user_id and question_id:
+            result = self.session.query(UserProblemStatus).filter(UserProblemStatus.user_id == user_id and UserProblemStatus.question_id == question_id).all()
+            if len(result) > 1:
+                print("get_user_problem_status: Duplicate user id and question id")
+                return None
+            if len(result) < 1:
+                print("get_user_problem_status: No question status found for user id or question id")
+                return None
+            return self.dictify(result)[0]
+        else:
+            print("get_user_problem_status: No user_id or question_id passed in") #ideally i should change all these messages to "missing 1 or more arguments"
+            return None
+
+    def update_user_problem_status(self, user_id: int, question_id: int, viewing_status: bool, correct_status: bool, attempt_count: int, creation_date: int):
+        if user_id and question_id:
+            result = self.session.query(UserProblemStatus).filter(UserProblemStatus.user_id == user_id and UserProblemStatus.question_id == question_id).all()
+            if len(result) > 1:
+                print("get_user_problem_status: Duplicate user id and question id")
+                return None
+            if len(result) < 1:
+                print("get_user_problem_status: No question status found for user id or question id")
+                return None
+            result = result[0]
+            if viewing_status:
+                result.viewing_status == viewing_status
+            if correct_status:
+                result.correct_status == correct_status
+            if attempt_count:
+                result.attempt_count == attempt_count
+            if creation_date:
+                result.creation_date == creation_date
+            self.session.commit() #commits changes to file
+            return result.id
+        else:
+            print("get_user_problem_status: No user_id or question_id passed in")
+            return None

@@ -193,7 +193,7 @@ async def question(question_id: int, current_user: str = Depends(get_username_fr
     # answers = db.get #MAKE A DB INTERACTABLE FUNCTION THAT GETS ANSWERS
     return {"success":True,
             "content":question["content"],
-            "answers":"placeholder"}
+            "answers":}
 
 
 
