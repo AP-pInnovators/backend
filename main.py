@@ -25,7 +25,7 @@ import os
 
 SECRET_KEY = os.environ.get("PATH", "pathpathpathlol")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 120  # set token expiration time in minutes
+ACCESS_TOKEN_EXPIRE_MINUTES = 5259492  # set token expiration time in minutes (1 year right now)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token") #generates a dependency that extracts the token from the Authorization header
 
