@@ -170,7 +170,6 @@ async def get_question(question_id: int, current_user: str = Depends(get_usernam
     answers = db.get_answers(question_id)
     for answer in answers: #need to remove database id stuff as well as the answer bool (no cheating...)
         del answer["question_id"]
-        del answer["id"]
         del answer["correct"]
     if question and answers:
         return {"success":True,
@@ -184,14 +183,33 @@ async def get_question(question_id: int, current_user: str = Depends(get_usernam
 
 
 class AnswerSubmissionJSON(BaseModel):
-    content: str
+    id: str
 
 @app.post("/api/question/{question_id}")
 async def submit_answer(question_id: int, answer: AnswerSubmissionJSON, current_user: str = Depends(get_username_from_jwt)):
     try:
+        problem_status = db.get_user_problem_status(current_user["user_id"], question_id)
+    except:
+        return {"success":False,
+                "error_code":"placeholder",
+                "error_message":"Failed to add user response to database"}
+    if problem_status
+    try:
+        db.add_user_response(current_user["user_id"], question_id, answer.id, datetime.now(timezone.utc))
+    except:
+        return {"success":False,
+                "error_code":"placeholder",
+                "error_message":"Failed to add user response to database"}
+    try:
+        db.update_user_problem_status(question_id, )
+    except:
+        return {"success":False,
+                "error_code":"placeholder",
+                "error_message":"Failed to add user response to database"}
+    try:
         correct = False
         for answer_result in db.get_answers(question_id):
-            if answer_result["correct"] == True and answer_result["content"] == answer.content:
+            if answer_result["correct"] == True and answer_result["id"] == answer.id:
                 correct = True
                 continue
         return {"success":True,
