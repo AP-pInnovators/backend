@@ -192,26 +192,30 @@ async def submit_answer(question_id: int, answer: AnswerSubmissionJSON, current_
     except:
         return {"success":False,
                 "error_code":"placeholder",
-                "error_message":"Failed to add user response to database"}
-    if problem_status
+                "error_message":"Failed to get user problem status from database"}
+    if not problem_status["viewing_status"]:
+        return {"success":False,
+                "error_code":"placeholder",
+                "error_message":"User must be viewing question first to submit answer"}
     try:
         db.add_user_response(current_user["user_id"], question_id, answer.id, datetime.now(timezone.utc))
     except:
         return {"success":False,
                 "error_code":"placeholder",
                 "error_message":"Failed to add user response to database"}
-    try:
-        db.update_user_problem_status(question_id, )
-    except:
-        return {"success":False,
-                "error_code":"placeholder",
-                "error_message":"Failed to add user response to database"}
+    
     try:
         correct = False
         for answer_result in db.get_answers(question_id):
             if answer_result["correct"] == True and answer_result["id"] == answer.id:
                 correct = True
                 continue
+        try:
+            db.update_user_problem_status(current_user["user_id"], question_id, None, correct, problem_status["attempt_count"], None)
+        except:
+            return {"success":False,
+                "error_code":"placeholder",
+                "error_message":"User question status failed to be updated"}
         return {"success":True,
                 "correct":correct}
     except:

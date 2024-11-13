@@ -258,13 +258,13 @@ class DB:
                 return None
             result = result[0]
             if viewing_status:
-                result.viewing_status == viewing_status
+                result.viewing_status = viewing_status
             if correct_status:
-                result.correct_status == correct_status
+                result.correct_status = correct_status
             if attempt_count:
-                result.attempt_count == attempt_count
+                result.attempt_count = attempt_count
             if creation_date:
-                result.creation_date == creation_date
+                result.creation_date = creation_date
             self.session.commit() #commits changes to file
             return result.id
         else:
