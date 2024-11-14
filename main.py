@@ -183,12 +183,15 @@ async def get_question(question_id: int, current_user: str = Depends(get_usernam
 
 
 class AnswerSubmissionJSON(BaseModel):
-    id: str
+    content: str
 
 @app.post("/api/question/{question_id}")
 async def submit_answer(question_id: int, answer: AnswerSubmissionJSON, current_user: str = Depends(get_username_from_jwt)):
     try:
         problem_status = db.get_user_problem_status(current_user["user_id"], question_id)
+        if (problem_status == None):
+            db.add_user_problem_status(current_user["user_id"], question_id, True, False, 5, datetime.now(timezone.utc))
+            problem_status = db.get_user_problem_status(current_user["user_id"], question_id)
     except:
         return {"success":False,
                 "error_code":"placeholder",
@@ -198,16 +201,15 @@ async def submit_answer(question_id: int, answer: AnswerSubmissionJSON, current_
                 "error_code":"placeholder",
                 "error_message":"User must be viewing question first to submit answer"}
     try:
-        db.add_user_response(current_user["user_id"], question_id, answer.id, datetime.now(timezone.utc))
+        db.add_user_response(current_user["user_id"], question_id, answer.content, datetime.now(timezone.utc))
     except:
         return {"success":False,
                 "error_code":"placeholder",
                 "error_message":"Failed to add user response to database"}
-    
     try:
         correct = False
         for answer_result in db.get_answers(question_id):
-            if answer_result["correct"] == True and answer_result["id"] == answer.id:
+            if answer_result["correct"] == True and answer_result["content"] == answer.content:
                 correct = True
                 continue
         try:
