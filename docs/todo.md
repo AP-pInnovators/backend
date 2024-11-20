@@ -9,3 +9,11 @@ Make it so username has character limit, doesn't allow certain characters, basic
 Make it so email has to be a valid email (and add email verification later... much later lol)
 
 Make it so password has to be certain length
+
+
+Make error codes json file with corresponding messages, so that frontend can have it and import it so both backend and frontend can store error messages
+
+Make JWT tokens last forever, and also once I add back timed JWT tokens make an endpoint to refresh your session (lowkey could just go straight to the second part it wouldn't be difficult)
+
+update notes and everywhere else to reflect most recent json structure
+and add answer endpoint json structure
