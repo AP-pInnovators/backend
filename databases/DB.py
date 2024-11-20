@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
+import random
 
 class DB:
     Base = declarative_base() #base class that table schema classes inehrit from
@@ -90,6 +91,11 @@ class DB:
             self.session.add(user_stat)
         self.session.commit()
 
+    def update_user_score(self, user_id: int, question_id: int, attempts_taken: int, max_attempts: int):
+        score = 100*(1 - ((attempts_taken - 1.0)/(max_attempts)))
+        self.add_user_problem(user_id, question_id, status="solved")
+        self.update_user_stats(user_id, score)
+
     def get_users(self, username: str): #returns a list of dictionaries, one for each user
         #structure = session.query(table object).filter(operation on column object inside table object).all()/.first()
 
@@ -121,6 +127,26 @@ class DB:
 
         return question_list #should only return 1 or 0 elements
     
+    def get_new_question(self, user_id: int):
+        # get all questions that the user has seen
+        seen_question_ids = self.session.query(self.UserProblems.question_id).filter(self.UserProblems.user_id == user_id).subquery()
+
+        # query within the complement of those already seen questions
+        unseen_questions = self.session.query(self.Question).filter(~self.Question.id.in_(seen_question_ids)).all()
+
+        if not unseen_questions:
+            print("No unseen questions available for this user.")
+            return []
+
+        # Select a random question from unseen questions
+        random_question = random.choice(unseen_questions)
+
+        # convert question to dictionary and remove the nonsense SQLAlchemy metadata
+        question_dict = random_question.__dict__
+        question_dict.pop('_sa_instance_state', None)
+
+        return [question_dict]
+
     def add_question_answers_solutions(self, question: str, difficulty: int, answers: list, solutions: list):
         if question and answers:
             new_question = self.Question(content=question, difficulty=difficulty)
