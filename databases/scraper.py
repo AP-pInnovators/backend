@@ -1,7 +1,42 @@
 import requests
 from bs4 import BeautifulSoup
 from DB import DB
+import re
 
+def process_string(input_string):
+    # If the string contains 'frac' or 'dfrac', disregard it
+    if 'frac' in input_string or 'dfrac' in input_string:
+        return None
+
+    # Remove parentheses, brackets, and their content
+    input_string = re.sub(r'[()\[\]{}]', '', input_string)
+
+    # Remove content between < and > (i.e., tags or other content inside angle brackets)
+    input_string = re.sub(r'<.*?>', '', input_string)
+
+    # Remove specific words: 'qquad', 'text', 'math'
+    input_string = re.sub(r'\b(qquad|text|math)\b', '', input_string)
+
+    # Remove the tilde character (~)
+    input_string = input_string.replace('~', '')
+
+    # If the string starts with 'E', remove everything after a page break (if any)
+    if input_string.startswith('E'):
+        input_string = input_string.split('\n')[0]  # Keep only the part before any page break
+
+    # Remove page breaks/newlines
+    input_string = input_string.replace('\n', '').replace('\r', '')
+
+    return input_string.strip()
+
+def process_list_of_strings(strings):
+    result_list = []
+    for string in strings:
+        processed_string = process_string(string)
+        if processed_string:  # Only add to the result if it's not None or empty
+            result_list.append(processed_string)
+    return result_list
+    
 answers = """A
 D
 D
