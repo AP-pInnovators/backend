@@ -1,8 +1,8 @@
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import sessionmaker, declarative_base
 from databases.instance.DB_setup import *
-
-
+import os
+import random
 
 class DB:
     Base = declarative_base() #base class that table schema classes inehrit from
@@ -45,7 +45,27 @@ class DB:
             print("add_user: Missing username, email, or password, no user added")
             return None
 
-    def get_user_by_username(self, username: str): #returns a list of dictionaries, one for each user
+    def add_user_problem(self, user_id: int, question_id: int, status: str = "current"):
+        user_problem = self.UserProblems(user_id=user_id, question_id=question_id, status=status, seen=True)
+        self.session.add(user_problem)
+        self.session.commit()
+
+    def update_user_stats(self, user_id: int, score: int):
+        user_stat = self.session.query(self.UserStats).filter_by(user_id=user_id).first()
+        if user_stat:
+            user_stat.total_score += score
+            user_stat.solved_problems_count += 1
+        else:
+            user_stat = self.UserStats(user_id=user_id, total_score=score, solved_problems_count=1)
+            self.session.add(user_stat)
+        self.session.commit()
+
+    def update_user_score(self, user_id: int, question_id: int, attempts_taken: int, max_attempts: int):
+        score = 100*(1 - ((attempts_taken - 1.0)/(max_attempts)))
+        self.add_user_problem(user_id, question_id, status="solved")
+        self.update_user_stats(user_id, score)
+
+    def get_users(self, username: str): #returns a list of dictionaries, one for each user
         #structure = session.query(table object).filter(operation on column object inside table object).all()/.first()
         if username:
             result = self.session.query(User).filter(User.username == username).all()
@@ -143,6 +163,26 @@ class DB:
             return None
 
 
+
+    def get_new_question(self, user_id: int):
+        # get all questions that the user has seen
+        seen_question_ids = self.session.query(self.UserProblems.question_id).filter(self.UserProblems.user_id == user_id).subquery()
+
+        # query within the complement of those already seen questions
+        unseen_questions = self.session.query(self.Question).filter(~self.Question.id.in_(seen_question_ids)).all()
+
+        if not unseen_questions:
+            print("No unseen questions available for this user.")
+            return []
+
+        # Select a random question from unseen questions
+        random_question = random.choice(unseen_questions)
+
+        # convert question to dictionary and remove the nonsense SQLAlchemy metadata
+        question_dict = random_question.__dict__
+        question_dict.pop('_sa_instance_state', None)
+
+        return [question_dict]
 
     def add_question(self, content: str, difficulty: int):
         if content and difficulty != None:
