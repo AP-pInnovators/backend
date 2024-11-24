@@ -235,7 +235,7 @@ class DB:
         
     def get_user_problem_status(self, user_id: int, question_id: int):
         if user_id and question_id:
-            result = self.session.query(UserProblemStatus).filter(UserProblemStatus.user_id == user_id and UserProblemStatus.question_id == question_id).all()
+            result = self.session.query(UserProblemStatus).filter(UserProblemStatus.user_id == user_id, UserProblemStatus.question_id == question_id).all()
             if len(result) > 1:
                 print("get_user_problem_status: Duplicate user id and question id")
                 return None
@@ -249,7 +249,7 @@ class DB:
 
     def update_user_problem_status(self, user_id: int, question_id: int, viewing_status: bool, correct_status: bool, attempt_count: int, creation_date: int):
         if user_id and question_id:
-            result = self.session.query(UserProblemStatus).filter(UserProblemStatus.user_id == user_id and UserProblemStatus.question_id == question_id).all()
+            result = self.session.query(UserProblemStatus).filter(UserProblemStatus.user_id == user_id, UserProblemStatus.question_id == question_id).all()
             if len(result) > 1:
                 print("get_user_problem_status: Duplicate user id and question id")
                 return None
