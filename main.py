@@ -188,7 +188,9 @@ class AnswerSubmissionJSON(BaseModel):
 @app.post("/api/question/{question_id}")
 async def submit_answer(question_id: int, answer: AnswerSubmissionJSON, current_user: str = Depends(get_username_from_jwt)):
     try:
+        print(question_id)
         problem_status = db.get_user_problem_status(current_user["user_id"], question_id)
+        print(problem_status)
         if (problem_status == None):
             db.add_user_problem_status(current_user["user_id"], question_id, True, False, 5, datetime.now(timezone.utc))
             problem_status = db.get_user_problem_status(current_user["user_id"], question_id)
@@ -213,13 +215,23 @@ async def submit_answer(question_id: int, answer: AnswerSubmissionJSON, current_
                 correct = True
                 continue
         try:
-            db.update_user_problem_status(current_user["user_id"], question_id, None, correct, problem_status["attempt_count"], None)
+            new_attempt_count = problem_status["attempt_count"] - int(not correct)
+            if (new_attempt_count >= 0):         
+                db.update_user_problem_status(current_user["user_id"], question_id, None, correct, new_attempt_count, None)
         except:
             return {"success":False,
                 "error_code":"placeholder",
                 "error_message":"User question status failed to be updated"}
-        return {"success":True,
-                "correct":correct}
+        if not correct:
+            return {"success":True,
+                    "correct":correct,
+                    "attempts":new_attempt_count,
+                    "score":0}
+        else:
+            return {"success":True,
+                    "correct":correct,
+                    "attempts":new_attempt_count,
+                    "score":new_attempt_count*100}
     except:
         return {"success":False,
                 "error_code":"placeholder",
