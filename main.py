@@ -188,9 +188,7 @@ class AnswerSubmissionJSON(BaseModel):
 @app.post("/api/question/{question_id}")
 async def submit_answer(question_id: int, answer: AnswerSubmissionJSON, current_user: str = Depends(get_username_from_jwt)):
     try:
-        print(question_id)
         problem_status = db.get_user_problem_status(current_user["user_id"], question_id)
-        print(problem_status)
         if (problem_status == None):
             db.add_user_problem_status(current_user["user_id"], question_id, True, False, 5, datetime.now(timezone.utc))
             problem_status = db.get_user_problem_status(current_user["user_id"], question_id)
@@ -237,8 +235,16 @@ async def submit_answer(question_id: int, answer: AnswerSubmissionJSON, current_
                 "error_code":"placeholder",
                 "error_message":"Answer failed to be checked"}
         
-
-
+@app.get("/api/recommendation")
+async def recommend_question(current_user: str = Depends(get_username_from_jwt)):
+    try:
+        question = db.get_new_question(current_user["user_id"])
+        return {"success":True,
+                "question":question["id"]}
+    except:
+        return {"success":False,
+                "error_code":"placeholder",
+                "error_message":"Failed to recommend question"}
 
 
 

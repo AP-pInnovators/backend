@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker, declarative_base
 from databases.instance.DB_setup import *
+import random
 
 
 
@@ -246,6 +247,26 @@ class DB:
         else:
             print("get_user_problem_status: No user_id or question_id passed in") #ideally i should change all these messages to "missing 1 or more arguments"
             return None
+        
+    def get_new_question(self, user_id: int):
+        # get all questions that the user has seen
+        seen_question_ids = self.session.query(UserProblemStatus.question_id).filter(UserProblemStatus.user_id == user_id).subquery()
+
+        # query within the complement of those already seen questions
+        unseen_questions = self.session.query(Question).filter(~Question.id.in_(seen_question_ids)).all()
+        print(unseen_questions)
+        if not unseen_questions:
+            print("No unseen questions available for this user.")
+            return []
+
+        # Select a random question from unseen questions
+        random_question = random.choice(unseen_questions)
+
+        # convert question to dictionary and remove the nonsense SQLAlchemy metadata
+        question_dict = random_question.__dict__
+        question_dict.pop('_sa_instance_state', None)
+
+        return question_dict
 
     def update_user_problem_status(self, user_id: int, question_id: int, viewing_status: bool, correct_status: bool, attempt_count: int, creation_date: int):
         if user_id and question_id:
