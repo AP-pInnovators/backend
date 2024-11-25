@@ -240,7 +240,7 @@ async def recommend_question(current_user: str = Depends(get_username_from_jwt))
     try:
         question = db.get_new_question(current_user["user_id"])
         return {"success":True,
-                "question":question["id"]}
+                "id":question["id"]}
     except:
         return {"success":False,
                 "error_code":"placeholder",
