@@ -17,3 +17,5 @@ Make JWT tokens last forever, and also once I add back timed JWT tokens make an 
 
 update notes and everywhere else to reflect most recent json structure
 and add answer endpoint json structure
+
+Currently, points work like - 500 on first try, 400 on second, etc., but that means you get 100 for going through every option (thats wrong) so I'll have to fix that at some point

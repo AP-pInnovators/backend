@@ -254,7 +254,6 @@ class DB:
 
         # query within the complement of those already seen questions
         unseen_questions = self.session.query(Question).filter(~Question.id.in_(seen_question_ids)).all()
-        print(unseen_questions)
         if not unseen_questions:
             print("No unseen questions available for this user.")
             return []
@@ -291,3 +290,4 @@ class DB:
         else:
             print("get_user_problem_status: No user_id or question_id passed in")
             return None
+        
