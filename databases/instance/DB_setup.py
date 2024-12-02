@@ -7,8 +7,8 @@ import os
 #DONT FORGET TO RUN THIS IN THE ROOT DIRECTORY OF THE PROJECT (where main.py is located) OR NONE OF THIS WILL WORK
 
 reset_database = False #if you wanna reset your database completely (remove all existing entries) then turn this to true
-if reset_database and os.path.exists("databases\instance\database.db"):
-    os.remove("databases\instance\database.db")
+if reset_database and os.path.exists("databases\\instance\\database.db"):
+    os.remove("databases\\instance\\database.db")
 
 
 Base = declarative_base() #base class that table schema classes inehrit from

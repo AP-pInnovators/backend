@@ -1,7 +1,46 @@
 import requests
 from bs4 import BeautifulSoup
-from DB import DB
+from databases.DB import DB
 import re
+from pydantic import BaseModel
+from typing import List
+
+class AnswerAddJSON(BaseModel):
+    content: str
+    correct: bool
+
+class SolutionAddJSON(BaseModel):
+    content: str
+
+class QuestionAddJSON(BaseModel):
+    content: str
+    difficulty: int
+    answers: List[AnswerAddJSON]
+    solutions: List[SolutionAddJSON]
+
+db_instance = DB()
+
+def add_question(question: QuestionAddJSON):
+    answers = []
+    for answer in question.answers: #turns all answer json into dict
+        answers.append(answer.__dict__)
+    solutions = []
+    for solution in question.solutions: #turns all solution json into dict
+        solutions.append(solution.__dict__)
+    try:
+        question_id = db_instance.add_question(question.content, difficulty=question.difficulty)
+        for answer in question.answers:
+            db_instance.add_answer(question_id, answer.content, answer.correct)
+
+        for solution in question.solutions:
+            db_instance.add_solution(question_id, solution.content)
+
+        return {"success":True,
+                "message":"placeholder"}
+    except:
+        return {"success":False,
+                "error_code":"placeholder",
+                "error_message":"Question failed to be added"}
 
 def process_string(input_string):
     # If the string contains 'frac' or 'dfrac', disregard it
@@ -37,36 +76,34 @@ def process_list_of_strings(strings):
             result_list.append(processed_string)
     return result_list
     
-answers = """A
-D
-D
+answers = """E
+C
 A
+E
+C
 B
+C
+B
+B
+B
+C
+C
+B
+D
+E
+B
+E
+C
+E
+D
+C
 A
-B
-B
-D
-D
-B
+A
 C
-E
-B
-D
-D
-C
-B
-C
-D
-E
-E
-C
-B
 A""".split('\n')
 
-db_instance = DB()
-
-year = 2022
-test = "10B"
+year = 2020
+test = "10A"
 probs = 25
 for i in range(probs):
     url = f'https://artofproblemsolving.com/wiki/index.php?title={year}_AMC_{test}_Problems/Problem_{i + 1}&action=edit'
@@ -91,8 +128,22 @@ for i in range(probs):
         for content in contents:
             print(content)
             question = content.text.split('==')[2]
+
+            question = question.replace("<math>", "\(")
+            question = question.replace("</math>", "\)")
             
-            db_instance.add_scraped(problem_text=question, correct_answer=answers[i], difficulty=(i % 5 + 1))
+            add_question(QuestionAddJSON(**{
+    "content" : question,
+    "difficulty" : i // 5 + 1,
+    "answers" : [
+                AnswerAddJSON(**{"content" : "A", "correct" : answers[i]=="A"}),
+                AnswerAddJSON(**{"content" : "B", "correct" : answers[i]=="B"}),
+                AnswerAddJSON(**{"content" : "C", "correct" : answers[i]=="C"}),
+                AnswerAddJSON(**{"content" : "D", "correct" : answers[i]=="D"})
+                ],
+    "solutions" : []}))
+
+            #db_instance.adaped(problem_text=question, correct_answer=answers[i], difficulty=(i % 5 + 1))
     else:
         print(f"{i} NIGHTMARE!!!!")
         break
