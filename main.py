@@ -225,10 +225,23 @@ async def submit_answer(question_id: int, answer: AnswerSubmissionJSON, current_
                     "attempts":new_attempt_count,
                     "score":0}
         else:
-            return {"success":True,
-                    "correct":correct,
-                    "attempts":new_attempt_count,
-                    "score":new_attempt_count*100}
+            try:
+                user_stats = db.get_user_statistics(current_user["user_id"])
+                if (user_stats == None):
+                    db.add_user_statistics(current_user["user_id"])
+                    user_stats = db.get_user_statistics(current_user["user_id"])
+                    
+                db.update_user_statistics(current_user["user_id"], new_attempt_count*100, 1)
+                print(user_stats["total_score"])
+                
+                return {"success":True,
+                        "correct":correct,
+                        "attempts":new_attempt_count,
+                        "score":new_attempt_count*100}
+            except:
+                return {"success":False,
+                        "error_code":"placeholder",
+                        "error_message":"User stats failed to be updated"}
     except:
         return {"success":False,
                 "error_code":"placeholder",
@@ -245,6 +258,16 @@ async def recommend_question(current_user: str = Depends(get_username_from_jwt))
                 "error_code":"placeholder",
                 "error_message":"Failed to recommend question"}
 
+@app.get("/api/stats")
+async def get_stats(current_user: str = Depends(get_username_from_jwt)):
+    try:
+        stats = db.get_user_statistics(current_user["user_id"])
+        return {"success":True,
+                "score":stats["total_score"]}
+    except:
+        return {"success":False,
+                "error_code":"placeholder",
+                "error_message":"Failed to get stats"}
 
 
 
