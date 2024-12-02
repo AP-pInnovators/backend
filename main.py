@@ -148,7 +148,6 @@ async def add_question(question: QuestionAddJSON, current_user: str = Depends(ge
         solutions.append(solution.__dict__)
     try:
         question_id = db.add_question(question.content, difficulty=question.difficulty)
-
         for answer in question.answers:
             db.add_answer(question_id, answer.content, answer.correct)
 
